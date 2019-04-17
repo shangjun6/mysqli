@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>要求：增删查改，及cookie</title>
+		<script src="../js/jquery-1.10.1.js"></script>
+		<script src="../js/underscore.js"></script>
+		<script src="../js/cookie.js"></script>
+	</head>
+	<body>
+		编号：<input type="text" name="id" id="id" /> <br />
+		姓名：<input type="text" name="uname" id="name" /><br />
+		密码：<input type="text" name="upas" id="pas" /><br />
+		<button id="refer">提交</button>
+		<button id="gain">获取数据</button>
+		<button id="alter">修改</button>
+		<table id="table">
+			
+		</table>
+	</body>
+</html>
+<script type="text/template" id="tables">
+	<tr>
+		<td>编号</td>
+		<td>姓名</td>
+		<td>密码</td>
+	</tr>
+	<% for(var i=0;i<arr.length;i++){ %>
+		<tr>
+			<td><%= arr[i][0] %></td>
+			<td><%= arr[i][1] %></td>
+			<td><%= arr[i][2] %></td>
+			<td class="delete" sc="<%= arr[i][0] %>">删除</td>
+			<td class="update" sc="<%= arr[i][0] %>">修改</td>
+		</tr>
+	<% } %>
+</script>
+<script>
+	$(function(){
+//		提交数据
+		$("#refer").click(function(){
+			var ss=$("#id").val();
+			var so=$("#name").val();
+			var su=$("#pas").val();
+			$.ajax({
+				type:"get",
+				url:"http://192.168.43.229:8088/seven/4.16/admin/01.php",
+				async:true,
+				data:{id:ss,uname:so,upas:su}				
+			});
+		})
+		//获取数据
+		$("#gain").click(function(){
+			$.ajax({
+				type:"get",
+				url:"http://192.168.43.229:8088/seven/4.16/admin/02.php",
+				async:true,
+				success:function(data){
+					var arr=JSON.parse(data);
+					fn(arr);
+				}
+			});
+			
+		})
+		function fn(data){
+			var html=_.template($("#tables").html());
+			var so=html({arr:data});
+			$("#table").html(so);
+			setTimeout(function(){
+				//删除
+				$(".delete").click(function(){
+					var s=$(this).attr("sc");
+					$.ajax({
+						type:"get",
+						url:"http://192.168.43.229:8088/seven/4.16/admin/03.php",
+						async:true,
+						data:{eid:s},
+						success:function(data){
+							var arr=JSON.parse(data)
+							fn(arr);
+						}
+					});
+				})
+				//回显
+				$(".update").click(function(){
+					$("#id").val($(this).siblings("td").eq(0).html());
+					$("#name").val($(this).siblings("td").eq(1).html());
+					$("#pas").val($(this).siblings("td").eq(2).html());
+					
+				})
+				
+//				修改
+				
+
+			},1000)
+		}
+		$("#alter").click(function(){
+			var ss=$("#id").val();
+			var so=$("#name").val();
+			var su=$("#pas").val();
+			$.ajax({
+				type:"get",
+				url:"http://192.168.43.229:8088/seven/4.16/admin/04.php",
+				async:true,
+				data:{id:ss,uname:so,upas:su},
+				success:function(data){
+					var arr=JSON.parse(data)
+					fn(arr);
+				}
+			});
+		})	
+	})
+</script>
